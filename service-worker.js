@@ -1,54 +1,46 @@
-// Service Worker com suporte para offline (página offline + cópia das páginas offline)
+const CACHE_NAME = 'nome-do-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/script.js',
+  '/images/logo.png' // Ajuste os caminhos para os arquivos corretos
+];
 
-const CACHE = "pwabuilder-offline-page";
-
-// Usando a biblioteca Workbox para facilitar o gerenciamento do cache
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
-
-// Definindo a página de fallback offline corretamente
-const offlineFallbackPage = "offline.html";
-
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-});
-
-self.addEventListener('install', async (event) => {
+// Instala o Service Worker e adiciona recursos ao cache
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE)
-      .then((cache) => cache.add(offlineFallbackPage)) // Certifique-se que offline.html está no cache
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('Recursos em cache');
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
-if (workbox.navigationPreload.isSupported()) {
-  workbox.navigationPreload.enable();
-}
+// Ativa o Service Worker e remove caches antigos
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (!cacheWhitelist.includes(cacheName)) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
 
-workbox.routing.registerRoute(
-  new RegExp('/*'),
-  new workbox.strategies.StaleWhileRevalidate({
-    cacheName: CACHE
-  })
-);
-
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const preloadResp = await event.preloadResponse;
-
-        if (preloadResp) {
-          return preloadResp;
-        }
-
-        const networkResp = await fetch(event.request);
-        return networkResp;
-      } catch (error) {
-        const cache = await caches.open(CACHE);
-        const cachedResp = await cache.match(offlineFallbackPage);
-        return cachedResp;
+// Responde a requisições de rede
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      if (response) {
+        return response; // Retorna do cache
       }
-    })());
-  }
+      return fetch(event.request); // Faz a requisição de rede se não tiver no cache
+    })
+  );
 });
