@@ -14,32 +14,51 @@
 <body>
     <main id="container">
         <section id="img">
-            <img src="illustration.svg" alt="Imagem ilustrativa de saúde">
+            <img src="illustration.svg" alt="Imagem de ilustração">
         </section>
 
         <section id="calculator">
             <form id="form">
-                <h1 id="title">Calculadora - IMC</h1>
+                <h1 id="title">
+                    Calculadora - IMC
+                </h1>
 
                 <div class="input-box">
-                    <label for="weight">Peso em kg</label>
+                    <label for="weight">
+                        Peso em kg
+                    </label>
                     <div class="input-field">
                         <i class="fa-solid fa-weight-hanging"></i>
                         <input type="number" id="weight" name="weight" required>
-                        <span>Kg</span>
+                        <span>
+                            Kg
+                        </span>
                     </div>
                 </div>
 
                 <div class="input-box">
-                    <label for="height">Altura em metros</label>
+                    <label for="height">
+                        Altura em metros
+                    </label>
                     <div class="input-field">
                         <i class="fa-solid fa-ruler"></i>
                         <input type="number" step="0.01" id="height" name="height" required>
-                        <span>m</span>
+                        <span>
+                            m
+                        </span>
                     </div>
                 </div>
+
+                <div class="input-box">
+                    <label for="voiceSelect">
+                        Escolha uma voz:
+                    </label>
+                    <select id="voiceSelect"></select>
+                </div>
                 
-                <button id="calculate">Calcular</button>
+                <button id="calculate">
+                    Calcular
+                </button>
             </form>    
             
             <div id="infos" class="hidden">
@@ -63,5 +82,16 @@
         </section>
     </main>
     <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+                    console.log('ServiceWorker registrado com sucesso no escopo: ', registration.scope);
+                }, function(error) {
+                    console.log('Falha ao registrar o ServiceWorker: ', error);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
