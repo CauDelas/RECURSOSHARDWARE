@@ -15,10 +15,8 @@ function populateVoiceList() {
     });
 }
 
-// Atualiza a lista de vozes quando elas são carregadas
-if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = populateVoiceList;
-}
+// Atualiza a lista de vozes quando elas estão carregadas
+synth.onvoiceschanged = populateVoiceList;
 
 // Função para falar o texto
 function speak(text) {
@@ -89,3 +87,4 @@ if ('serviceWorker' in navigator) {
         });
     });
 });
+
