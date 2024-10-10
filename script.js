@@ -1,6 +1,41 @@
 // Lógica de cálculo do IMC e manipulação de DOM
 const form = document.getElementById('form');
+const voiceSelect = document.getElementById('voiceSelect');
+const synth = window.speechSynthesis;
 
+// Preencher o select com as vozes disponíveis
+function populateVoiceList() {
+    const voices = synth.getVoices();
+    voiceSelect.innerHTML = ''; // Limpa as opções existentes
+    voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+    });
+}
+
+// Atualiza a lista de vozes quando elas são carregadas
+if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = populateVoiceList;
+}
+
+// Função para falar o texto
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice = voiceSelect.value;
+
+    const voices = synth.getVoices();
+    const voice = voices.find(v => v.name === selectedVoice);
+    
+    if (voice) {
+        utterance.voice = voice;
+    }
+
+    synth.speak(utterance);
+}
+
+// Evento de submit do formulário
 form.addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -38,6 +73,9 @@ form.addEventListener('submit', function(event) {
 
         value.textContent = bmi.replace('.', ',');
         document.getElementById('description').textContent = description;
+
+        // Falar o resultado
+        speak(`Seu IMC é ${bmi.replace('.', ',')}. ${description}`);
     }
 });
 
@@ -50,4 +88,4 @@ if ('serviceWorker' in navigator) {
             console.log('Falha ao registrar o ServiceWorker: ', error);
         });
     });
-}
+});
